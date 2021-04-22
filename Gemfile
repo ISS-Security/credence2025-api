@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 source 'https://rubygems.org'
+ruby File.read('.ruby-version').strip
 
 # Web API
 gem 'base64'
@@ -19,12 +20,16 @@ gem 'rbnacl', '~>7.1'
 # Database
 gem 'hirb', '~>0.7'
 gem 'sequel', '~>5.67'
+group :production do
+  gem 'pg'
+end
 
 # Debugging
-gem 'pry'
+gem 'pry' # necessary for rake console
 
 # Development
 group :development do
+  # debugging
   gem 'rerun'
 
   # Quality

@@ -7,7 +7,7 @@
 #  require_app
 #  require_app('config')
 #  require_app(['config', 'models'])
-def require_app(folders = %w[config lib models controllers], config: true)
+def require_app(folders = %w[config lib models services controllers])
   app_list = Array(folders).map { |folder| "app/#{folder}" }
   app_list = ['config', app_list] if config
   full_list = app_list.flatten.join(',')

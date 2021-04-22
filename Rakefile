@@ -3,8 +3,7 @@
 require 'rake/testtask'
 require './require_app'
 
-# rubocop:disable Style/HashSyntax, Style/SymbolArray
-task :default => :spec
+task default: [:spec]
 
 desc 'Tests API specs only'
 task :api_spec do
@@ -17,8 +16,13 @@ Rake::TestTask.new(:spec) do |t|
   t.warning = false
 end
 
+desc 'Rerun tests on live code changes'
+task :respec do
+  sh 'rerun -c rake spec'
+end
+
 desc 'Runs rubocop on tested code'
-task :style => [:spec, :audit] do
+task style: %i[spec audit] do
   sh 'rubocop .'
 end
 
@@ -28,7 +32,7 @@ task :audit do
 end
 
 desc 'Checks for release'
-task :release_check => [:spec, :style, :audit] do
+task release_check: %i[spec style audit] do
   puts "\nReady for release!"
 end
 
@@ -37,37 +41,32 @@ task :print_env do # rubocop:disable Rake/Desc
 end
 
 desc 'Run application console (pry)'
-task :console => :print_env do
+task console: :print_env do
   sh 'pry -r ./spec/test_load_all'
 end
 
 namespace :db do # rubocop:disable Metrics/BlockLength
-  task :load do # rubocop:disable Rake/Desc
-    require_app(['config'])
-    require 'sequel'
+  require_app('config')
+  require 'sequel'
 
-    Sequel.extension :migration
-    @app = Credence::Api
-  end
-
-  task :load_models do # rubocop:disable Rake/Desc
-    require_app(%w[config models])
-  end
+  Sequel.extension :migration
+  app = Credence::Api
 
   desc 'Run migrations'
-  task :migrate => [:load, :print_env] do
+  task migrate: :print_env do
     puts 'Migrating database to latest'
     Sequel::Migrator.run(@app.DB, 'db/migrations')
   end
 
-  desc 'Destroy data in database; maintain tables'
-  task :delete => :load_models do
-    Credence::Project.dataset.destroy
+  desc 'Delete database'
+  task :delete do
+    app.DB[:documents].delete
+    app.DB[:projects].delete
   end
 
   desc 'Delete dev or test database file'
-  task :drop => :load do
-    if @app.environment == :production
+  task :drop do
+    if app.environment == :production
       puts 'Cannot wipe production database!'
       return
     end
@@ -76,6 +75,26 @@ namespace :db do # rubocop:disable Metrics/BlockLength
     FileUtils.rm(db_filename)
     puts "Deleted #{db_filename}"
   end
+
+  task :load_models do # rubocop:disable Rake/Desc
+    require_app(%w[config lib models services])
+  end
+
+  task reset_seeds: [:load_models] do
+    app.DB[:schema_seeds].delete if app.DB.tables.include?(:schema_seeds)
+    Credence::Account.dataset.destroy
+  end
+
+  desc 'Seeds the development database'
+  task seed: [:load_models] do
+    require 'sequel/extensions/seed'
+    Sequel::Seed.setup(:development)
+    Sequel.extension :seed
+    Sequel::Seeder.apply(app.DB, 'app/db/seeds')
+  end
+
+  desc 'Delete all data and reseed'
+  task reseed: %i[reset_seeds seed]
 end
 
 namespace :newkey do
@@ -85,4 +104,3 @@ namespace :newkey do
     puts "DB_KEY: #{SecureDB.generate_key}"
   end
 end
-# rubocop:enable Style/HashSyntax, Style/SymbolArray

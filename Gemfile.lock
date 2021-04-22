@@ -96,7 +96,7 @@ DEPENDENCIES
   base64
   bundler-audit
   figaro (~> 1.2)
-  hirb
+  hirb (~> 0.7)
   json
   logger (~> 1.0)
   minitest
@@ -104,7 +104,7 @@ DEPENDENCIES
   pry
   puma (~> 6.0)
   rack-test
-  rake
+  rake (~> 13.0)
   rbnacl (~> 7.1)
   rerun
   roda (~> 3.0)

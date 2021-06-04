@@ -17,8 +17,10 @@ module Credence
       return nil unless @routing.headers['AUTHORIZATION']
 
       scheme, auth_token = @routing.headers['AUTHORIZATION'].split
+      return nil unless scheme.match?(/^Bearer$/i)
+
       account_payload = AuthToken.new(auth_token).payload
-      scheme.match?(/^Bearer$/i) ? account_payload['attributes'] : nil
+      Account.first(username: account_payload['attributes']['username'])
     end
 
     def body_data

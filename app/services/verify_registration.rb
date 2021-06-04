@@ -37,7 +37,7 @@ module Credence
     def html_email
       <<~END_EMAIL
         <H1>Credence App Registration Received</H1>
-        <p>Please <a href=\"#{@registration[:verification_url]}\">click here</a>
+        <p>Please <a href="#{@registration[:verification_url]}">click here</a>
         to validate your email.
         You will be asked to set a password to activate your account.</p>
       END_EMAIL
@@ -61,8 +61,6 @@ module Credence
       res = HTTP.auth("Bearer #{mail_api_key}")
                 .post(mail_url, json: mail_json)
       raise EmailProviderError if res.status >= 300
-    rescue EmailProviderError
-      raise EmailProviderError
     rescue StandardError
       raise(InvalidRegistration,
             'Could not send verification email; please check email address')

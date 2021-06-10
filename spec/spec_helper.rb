@@ -14,13 +14,26 @@ def wipe_database
   Credence::Account.map(&:destroy)
 end
 
-def auth_header(account_data)
-  auth = Credence::AuthenticateAccount.call(
+def authenticate(account_data)
+  Credence::AuthenticateAccount.call(
     username: account_data['username'],
     password: account_data['password']
   )
+end
 
-  "Bearer #{auth[:attributes][:auth_token]}"
+def auth_header(account_data)
+  authenticated_account = authenticate(account_data)
+
+  "Bearer #{authenticated_account[:attributes][:auth_token]}"
+end
+
+def authorization(account_data)
+  authenticated_account = authenticate(account_data)
+
+  token = AuthToken.new(authenticated_account[:attributes][:auth_token])
+  account_data = token.payload['attributes']
+  account = Credence::Account.first(username: account_data['username'])
+  Credence::AuthorizedAccount.new(account, token.scope)
 end
 
 DATA = {

@@ -13,14 +13,16 @@ module Credence
       @routing.scheme.casecmp(Api.config.SECURE_SCHEME).zero?
     end
 
-    def authenticated_account
+    def authorized_account
       return nil unless @routing.headers['AUTHORIZATION']
 
       scheme, auth_token = @routing.headers['AUTHORIZATION'].split
       return nil unless scheme.match?(/^Bearer$/i)
 
       account_payload = AuthToken.new(auth_token).payload
-      Account.first(username: account_payload['attributes']['username'])
+      account = Account.first(username: account_payload['attributes']['username'])
+      token = AuthToken.new(auth_token)
+      AuthorizedAccount.new(account, token.scope)
     end
 
     def body_data

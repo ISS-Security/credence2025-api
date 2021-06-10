@@ -56,7 +56,7 @@ namespace :db do # rubocop:disable Metrics/BlockLength
   end
 
   task load_models: [:load] do
-    require_app(%w[lib models services])
+    require_app(%w[lib models policies services])
   end
 
   desc 'Run migrations'

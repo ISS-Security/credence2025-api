@@ -18,6 +18,14 @@ PROJ_INFO = YAML.load_file("#{DIR}/projects_seed.yml")
 DOCUMENT_INFO = YAML.load_file("#{DIR}/documents_seed.yml")
 CONTRIB_INFO = YAML.load_file("#{DIR}/projects_collaborators.yml")
 
+def scoped_auth(auth_token)
+  token = AuthToken.new(auth_token)
+  account_data = token.payload['attributes']
+
+  account = Credence::Account.first(username: account_data['username'])
+  Credence::AuthorizedAccount.new(account, token.scope)
+end
+
 def create_accounts
   ACCOUNTS_INFO.each do |account_info|
     Credence::Account.create(account_info)
@@ -29,33 +37,38 @@ def create_owned_projects
     account = Credence::Account.first(username: owner['username'])
     owner['proj_name'].each do |proj_name|
       proj_data = PROJ_INFO.find { |proj| proj['name'] == proj_name }
-      Credence::CreateProjectForOwner.call(
-        owner_id: account.id, project_data: proj_data
-      )
+      account.add_owned_project(proj_data)
     end
   end
 end
 
-def create_documents
+def create_documents # rubocop:disable Metrics/MethodLength
   doc_info_each = DOCUMENT_INFO.each
   projects_cycle = Credence::Project.all.cycle
   loop do
     doc_info = doc_info_each.next
     project = projects_cycle.next
+
+    auth_token = AuthToken.create(project.owner)
+    auth = scoped_auth(auth_token)
+
     Credence::CreateDocument.call(
-      account: project.owner, project_id: project.id, document_data: doc_info
+      auth: auth, project_id: project.id, document_data: doc_info
     )
   end
 end
 
-def add_collaborators
+def add_collaborators # rubocop:disable Metrics/MethodLength
   contrib_info = CONTRIB_INFO
   contrib_info.each do |contrib|
     project = Credence::Project.first(name: contrib['proj_name'])
+
+    auth_token = AuthToken.create(project.owner)
+    auth = scoped_auth(auth_token)
+
     contrib['collaborator_email'].each do |email|
-      account = project.owner
       Credence::AddCollaborator.call(
-        account: account, project_id: project.id, collab_email: email
+        auth: auth, project_id: project.id, collab_email: email
       )
     end
   end

@@ -19,7 +19,7 @@ module Credence
       account = Account.first(username: credentials[:username])
       raise unless account.password?(credentials[:password])
 
-      AuthorizedAccount.new(account, AuthScope::EVERYTHING).to_h
+      AuthorizedAccount.new(account, AuthScope::FULL).to_h
     rescue StandardError
       raise UnauthorizedError
     end

@@ -21,7 +21,7 @@ module Credence
         rescue GetProjectQuery::NotFoundError => e
           routing.halt 404, { message: e.message }.to_json
         rescue StandardError => e
-          puts "FIND PROJECT ERROR: #{e.inspect}"
+          Api.logger.error "FIND PROJECT ERROR: #{e.inspect}"
           routing.halt 500, { message: 'API server error' }.to_json
         end
 

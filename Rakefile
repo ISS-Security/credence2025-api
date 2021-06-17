@@ -101,16 +101,25 @@ namespace :db do # rubocop:disable Metrics/BlockLength
 end
 
 namespace :newkey do
+  task(:load_libs) { require_app('lib', config: false) }
+
   desc 'Create sample cryptographic key for database'
-  task :db do
-    require_app('lib', config: false)
+  task :db => :load_libs do
     puts "DB_KEY: #{SecureDB.generate_key}"
   end
 
   desc 'Create sample cryptographic key for tokens and messaging'
-  task :msg do
+  task :msg => :load_libs do
     require_app('lib', config: false)
     puts "MSG_KEY: #{AuthToken.generate_key}"
+  end
+
+  desc 'Create sample sign/verify keypair for signed communication'
+  task :signing => :load_libs do
+    keypair = SignedRequest.generate_keypair
+
+    puts "SIGNING_KEY: #{keypair[:signing_key]}"
+    puts " VERIFY_KEY: #{keypair[:verify_key]}"
   end
 end
 

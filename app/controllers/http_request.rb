@@ -28,5 +28,9 @@ module Credence
     def body_data
       JSON.parse(@routing.body.read, symbolize_names: true)
     end
+
+    def signed_body_data
+      SignedRequest.parse(body_data)
+    end
   end
 end

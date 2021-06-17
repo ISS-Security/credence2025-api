@@ -27,8 +27,9 @@ module Credence
       def self.DB = DB # rubocop:disable Naming/MethodName
 
       # Load crypto keys
-      SecureDB.setup(ENV.delete('DB_KEY')) # Load crypto key
-      AuthToken.setup(ENV.fetch('MSG_KEY')) # Load crypto key
+      SecureDB.setup(ENV.delete('DB_KEY'))
+      AuthToken.setup(ENV.fetch('MSG_KEY'))
+      SignedRequest.setup(ENV.delete('VERIFY_KEY'), ENV.delete('SIGNING_KEY'))
 
       # Custom events logging
       LOGGER = Logger.new($stderr)

@@ -1,17 +1,23 @@
 # frozen_string_literal: true
 
 require 'roda'
-require_relative './app'
+require_relative 'app'
 
 module Credence
   # Web controller for Credence API
   class Api < Roda
     route('auth') do |routing| # rubocop:disable Metrics/BlockLength
+      # All requests in this route require signed requests
+      begin
+        @request_data = HttpRequest.new(routing).signed_body_data
+      rescue SignedRequest::VerificationError
+        routing.halt '403', { message: 'Must sign request' }.to_json
+      end
+
       routing.on 'register' do
         # POST api/v1/auth/register
         routing.post do
-          reg_data = JSON.parse(request.body.read, symbolize_names: true)
-          VerifyRegistration.new(reg_data).call
+          VerifyRegistration.new(@request_data).call
 
           response.status = 202
           { message: 'Verification email sent' }.to_json
@@ -29,8 +35,7 @@ module Credence
       routing.is 'authenticate' do
         # POST /api/v1/auth/authenticate
         routing.post do
-          credentials = HttpRequest.new(routing).body_data
-          auth_account = AuthenticateAccount.call(credentials)
+          auth_account = AuthenticateAccount.call(@request_data)
           { data: auth_account }.to_json
         rescue AuthenticateAccount::UnauthorizedError
           routing.halt '401', { message: 'Invalid credentials' }.to_json
@@ -39,14 +44,11 @@ module Credence
 
       # POST /api/v1/auth/authenticate/sso
       routing.post 'sso' do
-        auth_request = HttpRequest.new(routing).body_data
-
-        auth_account = AuthenticateSso.new.call(auth_request[:access_token])
+        auth_account = AuthenticateSso.new.call(@request_data[:access_token])
         { data: auth_account }.to_json
       rescue StandardError => e
         Api.logger.warn "FAILED to validate Github account: #{e.inspect}" \
                         "\n#{e.backtrace}"
-
         routing.halt 400
       end
     end

@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-# rubocop:disable Style/HashSyntax, Style/SymbolArray, Metrics/BlockLength
 require 'rake/testtask'
 require './require_app'
 
@@ -47,7 +46,7 @@ task console: :print_env do
 end
 
 namespace :db do # rubocop:disable Metrics/BlockLength
-  require_app('config')
+  require_app(nil)
   require 'sequel'
 
   Sequel.extension :migration
@@ -56,7 +55,7 @@ namespace :db do # rubocop:disable Metrics/BlockLength
   desc 'Run migrations'
   task migrate: :print_env do
     puts 'Migrating database to latest'
-    Sequel::Migrator.run(@app.DB, 'db/migrations')
+    Sequel::Migrator.run(app.DB, 'db/migrations')
   end
 
   desc 'Delete database'
@@ -78,7 +77,7 @@ namespace :db do # rubocop:disable Metrics/BlockLength
   end
 
   task :load_models do # rubocop:disable Rake/Desc
-    require_app(%w[config lib models services])
+    require_app(%w[lib models services])
   end
 
   task reset_seeds: [:load_models] do
@@ -91,7 +90,7 @@ namespace :db do # rubocop:disable Metrics/BlockLength
     require 'sequel/extensions/seed'
     Sequel::Seed.setup(:development)
     Sequel.extension :seed
-    Sequel::Seeder.apply(app.DB, 'app/db/seeds')
+    Sequel::Seeder.apply(app.DB, 'db/seeds')
   end
 
   desc 'Delete all data and reseed'
@@ -105,4 +104,3 @@ namespace :newkey do
     puts "DB_KEY: #{SecureDB.generate_key}"
   end
 end
-# rubocop:enable Style/HashSyntax, Style/SymbolArray, Metrics/BlockLength

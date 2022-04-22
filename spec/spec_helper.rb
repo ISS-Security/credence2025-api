@@ -15,7 +15,7 @@ def wipe_database
 end
 
 DATA = {
-  accounts: YAML.load(File.read('app/db/seeds/accounts_seed.yml')),
-  documents: YAML.load(File.read('app/db/seeds/documents_seed.yml')),
-  projects: YAML.load(File.read('app/db/seeds/projects_seed.yml'))
+  accounts: YAML.load_file('db/seeds/accounts_seed.yml'),
+  documents: YAML.load_file('db/seeds/documents_seed.yml'),
+  projects: YAML.load_file('db/seeds/projects_seed.yml')
 }.freeze

@@ -14,8 +14,8 @@ describe 'Test Password Digestion' do
     password = 'secret password of 雷松亞 stored in db'
     digest_s = Credence::Password.digest(password).to_s
 
-    digest = Credence::Password.from_digest(digest_s)
-    _(digest.correct?(password)).must_equal true
+    stored_password = Credence::Password.from_digest(digest_s)
+    _(stored_password.correct?(password)).must_equal true
   end
 
   it 'SECURITY: successfully detects incorrect password from stored digest' do
@@ -23,7 +23,7 @@ describe 'Test Password Digestion' do
     password2 = 'Ifyouwishtomakeapplepieyoumustfirstinventtheuniverse'
     digest_s1 = Credence::Password.digest(password1).to_s
 
-    digest1 = Credence::Password.from_digest(digest_s1)
-    _(digest1.correct?(password2)).must_equal false
+    true_password1 = Credence::Password.from_digest(digest_s1)
+    _(true_password1.correct?(password2)).must_equal false
   end
 end

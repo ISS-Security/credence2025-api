@@ -4,8 +4,6 @@ source 'https://rubygems.org'
 ruby File.read('.ruby-version').strip
 
 # Web API
-gem 'base64'
-gem 'json'
 gem 'logger', '~> 1.0'
 gem 'puma', '~>6.0'
 gem 'roda', '~>3.0'
@@ -24,12 +22,20 @@ group :production do
   gem 'pg'
 end
 
+# Data Encoding and Formatting
+gem 'base64'
+gem 'json'
+
+# External Services
+gem 'http'
+
 # Debugging
 gem 'pry' # necessary for rake console
+gem 'rack-test'
 
 # Development
 group :development do
-  # debugging
+  # Debugging
   gem 'rerun'
 
   # Quality
@@ -43,11 +49,8 @@ group :development do
   gem 'bundler-audit'
 end
 
+# Dev/test Database
 group :development, :test do
-  # API testing
-  gem 'rack-test'
-
-  # Database
   gem 'sequel-seed'
   gem 'sqlite3', '~>1.6'
 end

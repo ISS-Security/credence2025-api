@@ -4,6 +4,7 @@ source 'https://rubygems.org'
 
 # Web API
 gem 'json'
+gem 'logger', '~> 1.0'
 gem 'puma', '~>6.0'
 gem 'roda', '~>3.0'
 

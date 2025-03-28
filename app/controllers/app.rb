@@ -2,6 +2,7 @@
 
 require 'roda'
 require 'json'
+require 'logger'
 
 require_relative '../models/document'
 
@@ -10,6 +11,7 @@ module Credence
   class Api < Roda
     plugin :environments
     plugin :halt
+    plugin :common_logger, $stderr
 
     configure do
       Document.setup

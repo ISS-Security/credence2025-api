@@ -3,6 +3,7 @@
 source 'https://rubygems.org'
 
 # Web API
+gem 'base64'
 gem 'json'
 gem 'logger', '~> 1.0'
 gem 'puma', '~>6.0'

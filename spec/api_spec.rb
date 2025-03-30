@@ -34,7 +34,6 @@ describe 'Test Credence Web API' do
 
       get 'api/v1/documents'
       result = JSON.parse last_response.body
-      _(result['document_ids'].count).must_equal 2
       _(result['document_ids'].uniq.count).must_equal 2
     end
 

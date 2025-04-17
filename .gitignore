@@ -1,2 +1,5 @@
 _*
+.bundle
+.irb_history
 db/local/*
+config/secrets.yml

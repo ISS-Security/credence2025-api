@@ -42,6 +42,9 @@ module Credence
 
     configure :development, :test do
       require 'pry'
+    end
+
+    configure :test do
       logger.level = Logger::ERROR
     end
   end

@@ -1,9 +1,0 @@
----
-- filename: 'secrets.yml'
-  relative_path: '/'
-  description: 'AWS credentials'
-  content: 'adslkdasflkhjkdfs'
-- filename: 'another.yml'
-  relative_path: ''
-  description: 'configuration'
-  content: "---\n-key: 名字\n  value: 雷松亞"

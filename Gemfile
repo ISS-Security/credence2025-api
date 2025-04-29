@@ -11,16 +11,17 @@ gem 'roda', '~>3.0'
 
 # Configuration
 gem 'figaro', '~>1.2'
-gem 'rake'
+gem 'rake', '~>13.0'
 
 # Security
 gem 'rbnacl', '~>7.1'
 
 # Database
-gem 'hirb'
-gem 'sequel', '~>5.55'
+gem 'hirb', '~>0.7'
+gem 'sequel', '~>5.67'
 group :development, :test do
-  gem 'sqlite3', '~>1.4'
+  gem 'sequel-seed'
+  gem 'sqlite3', '~>1.6'
 end
 
 # Performance

@@ -31,7 +31,7 @@ module Credence
 
           # POST api/v1/projects/[proj_id]/documents
           routing.post do
-            new_data = JSON.parse(routing.body.read)
+            new_data = HttpRequest.new(routing).body_data
 
             new_doc = CreateDocumentForProject.call(
               project_id: proj_id, document_data: new_data
@@ -68,7 +68,7 @@ module Credence
 
       # POST api/v1/projects
       routing.post do
-        new_data = JSON.parse(routing.body.read)
+        new_data = HttpRequest.new(routing).body_data
         new_proj = Project.new(new_data)
         raise('Could not save project') unless new_proj.save
 

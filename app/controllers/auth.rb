@@ -10,7 +10,7 @@ module Credence
       routing.is 'authenticate' do
         # POST /api/v1/auth/authenticate
         routing.post do
-          credentials = JSON.parse(request.body.read, symbolize_names: true)
+          credentials = HttpRequest.new(routing).body_data
           auth_account = AuthenticateAccount.call(credentials)
           auth_account.to_json
         rescue UnauthorizedError => e

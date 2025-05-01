@@ -21,7 +21,7 @@ module Credence
 
       # POST api/v1/accounts
       routing.post do
-        new_data = JSON.parse(routing.body.read)
+        new_data = HttpRequest.new(routing).body_data
         new_account = Account.new(new_data)
         raise('Could not save account') unless new_account.save
 

@@ -10,16 +10,10 @@ module Credence
     plugin :halt
     plugin :multi_route
 
-    def secure_request?(routing)
-      raise 'Secure scheme not configured' unless Api.config.SECURE_SCHEME
-
-      routing.scheme.casecmp(Api.config.SECURE_SCHEME).zero?
-    end
-
     route do |routing|
       response['Content-Type'] = 'application/json'
 
-      secure_request?(routing) ||
+      HttpRequest.new(routing).secure? ||
         routing.halt(403, { message: 'TLS/SSL Required' }.to_json)
 
       routing.root do

@@ -2,7 +2,6 @@
 
 require 'roda'
 require 'json'
-require 'logger'
 
 module Credence
   # Web controller for Credence API

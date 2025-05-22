@@ -17,7 +17,8 @@ module Credence
       end
     end
 
-    def self.call(account:, project:, document_data:)
+    def self.call(account:, project_id:, document_data:)
+      project = Project.first(id: project_id)
       policy = ProjectPolicy.new(account, project)
       raise ForbiddenError unless policy.can_add_documents?
 

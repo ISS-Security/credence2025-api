@@ -10,8 +10,9 @@ module Credence
       end
     end
 
-    def self.call(account:, project:, collab_email:)
+    def self.call(account:, project_id:, collab_email:)
       invitee = Account.first(email: collab_email)
+      project = Project.first(id: project_id)
       policy = CollaborationRequestPolicy.new(project, account, invitee)
       raise ForbiddenError unless policy.can_invite?
 

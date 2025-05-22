@@ -22,7 +22,7 @@ describe 'Test AddCollaborator service' do
   it 'HAPPY: should be able to add a collaborator to a project' do
     Credence::AddCollaborator.call(
       account: @owner,
-      project: @project,
+      project_id: @project.id,
       collab_email: @collaborator.email
     )
 
@@ -34,7 +34,7 @@ describe 'Test AddCollaborator service' do
     _(proc {
       Credence::AddCollaborator.call(
         account: @owner,
-        project: @project,
+        project_id: @project.id,
         collab_email: @owner.email
       )
     }).must_raise Credence::AddCollaborator::ForbiddenError

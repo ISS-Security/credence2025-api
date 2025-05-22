@@ -12,12 +12,11 @@ module Credence
 
       @proj_route = "#{@api_root}/projects"
       routing.on String do |proj_id|
-        @req_project = Project.first(id: proj_id)
-
         # GET api/v1/projects/[ID]
         routing.get do
           project = GetProjectQuery.call(
-            account: @auth_account, project: @req_project
+            account: @auth_account,
+            project_id: proj_id
           )
 
           { data: project }.to_json
@@ -35,7 +34,7 @@ module Credence
           routing.post do
             new_document = CreateDocument.call(
               account: @auth_account,
-              project: @req_project,
+              project_id: proj_id,
               document_data: HttpRequest.new(routing).body_data
             )
 
@@ -59,7 +58,7 @@ module Credence
 
             collaborator = AddCollaborator.call(
               account: @auth_account,
-              project: @req_project,
+              project_id: proj_id,
               collab_email: req_data['email']
             )
 

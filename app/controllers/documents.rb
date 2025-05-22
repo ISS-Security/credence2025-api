@@ -26,9 +26,6 @@ module Credence
           routing.halt 403, { message: e.message }.to_json
         rescue GetDocumentQuery::NotFoundError => e
           routing.halt 404, { message: e.message }.to_json
-        rescue StandardError => e
-          puts "GET DOCUMENT ERROR: #{e.inspect}"
-          routing.halt 500, { message: 'API server error' }.to_json
         end
       end
     end

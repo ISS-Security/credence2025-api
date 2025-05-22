@@ -17,7 +17,8 @@ module Credence
       end
     end
 
-    def self.call(account:, project:)
+    def self.call(account:, project_id:)
+      project = Project.first(id: project_id)
       raise NotFoundError unless project
 
       policy = ProjectPolicy.new(account, project)

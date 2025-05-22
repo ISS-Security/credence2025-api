@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Credence
-  # Policy to determine if account can view a project
+  # Scope of projects an account can access
   class ProjectPolicy
     # Scope of project policies
     class AccountScope

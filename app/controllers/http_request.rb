@@ -13,6 +13,14 @@ module Credence
       @routing.scheme.casecmp(Api.config.SECURE_SCHEME).zero?
     end
 
+    def authenticated_account
+      return nil unless @routing.headers['AUTHORIZATION']
+
+      scheme, auth_token = @routing.headers['AUTHORIZATION'].split
+      account_payload = AuthToken.new(auth_token).payload
+      scheme.match?(/^Bearer$/i) ? account_payload['attributes'] : nil
+    end
+
     def body_data
       JSON.parse(@routing.body.read, symbolize_names: true)
     end

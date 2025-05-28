@@ -42,8 +42,8 @@ def create_documents
   loop do
     doc_info = doc_info_each.next
     project = projects_cycle.next
-    Credence::CreateDocumentForProject.call(
-      project_id: project.id, document_data: doc_info
+    Credence::CreateDocument.call(
+      account: project.owner, project_id: project.id, document_data: doc_info
     )
   end
 end
@@ -51,10 +51,11 @@ end
 def add_collaborators
   contrib_info = CONTRIB_INFO
   contrib_info.each do |contrib|
-    proj = Credence::Project.first(name: contrib['proj_name'])
+    project = Credence::Project.first(name: contrib['proj_name'])
     contrib['collaborator_email'].each do |email|
-      Credence::AddCollaboratorToProject.call(
-        email:, project_id: proj.id
+      account = project.owner
+      Credence::AddCollaborator.call(
+        account: account, project_id: project.id, collab_email: email
       )
     end
   end

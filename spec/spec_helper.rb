@@ -14,6 +14,15 @@ def wipe_database
   Credence::Account.map(&:destroy)
 end
 
+def auth_header(account_data)
+  auth = Credence::AuthenticateAccount.call(
+    username: account_data['username'],
+    password: account_data['password']
+  )
+
+  "Bearer #{auth[:attributes][:auth_token]}"
+end
+
 DATA = {
   accounts: YAML.load_file('db/seeds/accounts_seed.yml'),
   documents: YAML.load_file('db/seeds/documents_seed.yml'),

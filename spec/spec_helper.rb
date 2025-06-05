@@ -14,13 +14,26 @@ def wipe_database
   Credence::Account.map(&:destroy)
 end
 
-def auth_header(account_data)
-  auth = Credence::AuthenticateAccount.call(
+def authenticate(account_data)
+  Credence::AuthenticateAccount.call(
     username: account_data['username'],
     password: account_data['password']
   )
+end
 
-  "Bearer #{auth[:attributes][:auth_token]}"
+def auth_header(account_data)
+  authenticated_account = authenticate(account_data)
+
+  "Bearer #{authenticated_account[:attributes][:auth_token]}"
+end
+
+def authorization(account_data)
+  authenticated_account = authenticate(account_data)
+
+  token = AuthToken.new(authenticated_account[:attributes][:auth_token])
+  account_data = token.payload['attributes']
+  account = Credence::Account.first(username: account_data['username'])
+  Credence::AuthorizedAccount.new(account, token.scope)
 end
 
 DATA = {
@@ -28,3 +41,10 @@ DATA = {
   documents: YAML.load_file('db/seeds/documents_seed.yml'),
   projects: YAML.load_file('db/seeds/projects_seed.yml')
 }.freeze
+
+## SSO fixtures
+GH_ACCOUNT_RESPONSE = YAML.load(
+  File.read('spec/fixtures/github_token_response.yml')
+)
+GOOD_GH_ACCESS_TOKEN = GH_ACCOUNT_RESPONSE.keys.first
+SSO_ACCOUNT = YAML.load(File.read('spec/fixtures/sso_account.yml'))

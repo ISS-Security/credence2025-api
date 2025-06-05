@@ -18,7 +18,7 @@ module Credence
 
         routing.get do
           document = GetDocumentQuery.call(
-            requestor: @auth_account, document: @req_document
+            auth: @auth, document: @req_document
           )
 
           { data: document }.to_json
@@ -26,6 +26,9 @@ module Credence
           routing.halt 403, { message: e.message }.to_json
         rescue GetDocumentQuery::NotFoundError => e
           routing.halt 404, { message: e.message }.to_json
+        rescue StandardError => e
+          Api.logger.warn "Document Error: #{e.inspect}"
+          routing.halt 500, { message: 'API server error' }.to_json
         end
       end
     end

@@ -7,17 +7,13 @@ module Credence
   class Api < Roda
     # rubocop:disable Metrics/BlockLength
     route('projects') do |routing|
-      unauthorized_message = { message: 'Unauthorized Request' }.to_json
-      routing.halt(403, unauthorized_message) unless @auth_account
+      routing.halt(403, UNAUTH_MSG) unless @auth_account
 
       @proj_route = "#{@api_root}/projects"
       routing.on String do |proj_id|
         # GET api/v1/projects/[ID]
         routing.get do
-          project = GetProjectQuery.call(
-            account: @auth_account,
-            project_id: proj_id
-          )
+          project = GetProjectQuery.call(auth: @auth, project_id: proj_id)
 
           { data: project }.to_json
         rescue GetProjectQuery::ForbiddenError => e
@@ -25,17 +21,18 @@ module Credence
         rescue GetProjectQuery::NotFoundError => e
           routing.halt 404, { message: e.message }.to_json
         rescue StandardError => e
-          puts "FIND PROJECT ERROR: #{e.inspect}"
+          Api.logger.error "FIND PROJECT ERROR: #{e.inspect}"
           routing.halt 500, { message: 'API server error' }.to_json
         end
 
         routing.on('documents') do
           # POST api/v1/projects/[proj_id]/documents
           routing.post do
+            new_doc_data = HttpRequest.new(routing).body_data
             new_document = CreateDocument.call(
-              account: @auth_account,
+              auth: @auth,
               project_id: proj_id,
-              document_data: HttpRequest.new(routing).body_data
+              document_data: new_doc_data
             )
 
             response.status = 201
@@ -54,12 +51,11 @@ module Credence
         routing.on('collaborators') do
           # PUT api/v1/projects/[proj_id]/collaborators
           routing.put do
-            req_data = JSON.parse(routing.body.read)
-
+            req_data = HttpRequest.new(routing).body_data
             collaborator = AddCollaborator.call(
-              account: @auth_account,
+              auth: @auth,
               project_id: proj_id,
-              collab_email: req_data['email']
+              collab_email: req_data[:email]
             )
 
             { data: collaborator }.to_json
@@ -71,10 +67,10 @@ module Credence
 
           # DELETE api/v1/projects/[proj_id]/collaborators
           routing.delete do
-            req_data = JSON.parse(routing.body.read)
+            req_data = HttpRequest.new(routing).body_data
             collaborator = RemoveCollaborator.call(
-              req_username: @auth_account.username,
-              collab_email: req_data['email'],
+              auth: @auth,
+              collab_email: req_data[:email],
               project_id: proj_id
             )
 
@@ -101,7 +97,9 @@ module Credence
         # POST api/v1/projects
         routing.post do
           new_data = HttpRequest.new(routing).body_data
-          new_proj = @auth_account.add_owned_project(new_data)
+          new_proj = CreateProjectForOwner.call(
+            auth: @auth, project_data: new_data
+          )
 
           response.status = 201
           response['Location'] = "#{@proj_route}/#{new_proj.id}"
@@ -109,6 +107,11 @@ module Credence
         rescue Sequel::MassAssignmentRestriction
           Api.logger.warn "MASS-ASSIGNMENT: #{new_data.keys}"
           routing.halt 400, { message: 'Illegal Attributes' }.to_json
+        rescue CreateProjectForOwner::ForbiddenError => e
+          routing.halt 403, { message: e.message }.to_json
+        rescue StandardError
+          Api.logger.error "Unknown error: #{e.message}"
+          routing.halt 500, { message: 'API server error' }.to_json
         end
       end
     end

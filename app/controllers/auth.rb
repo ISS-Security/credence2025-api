@@ -6,7 +6,7 @@ require_relative './app'
 module Credence
   # Web controller for Credence API
   class Api < Roda
-    route('auth') do |routing|
+    route('auth') do |routing| # rubocop:disable Metrics/BlockLength
       routing.on 'register' do
         # POST api/v1/auth/register
         routing.post do
@@ -33,8 +33,21 @@ module Credence
           auth_account = AuthenticateAccount.call(credentials)
           { data: auth_account }.to_json
         rescue AuthenticateAccount::UnauthorizedError
-          routing.halt '403', { message: 'Invalid credentials' }.to_json
+          routing.halt '401', { message: 'Invalid credentials' }.to_json
         end
+      end
+
+      # POST /api/v1/auth/authenticate/sso
+      routing.post 'sso' do
+        auth_request = HttpRequest.new(routing).body_data
+
+        auth_account = AuthenticateSso.new.call(auth_request[:access_token])
+        { data: auth_account }.to_json
+      rescue StandardError => e
+        Api.logger.warn "FAILED to validate Github account: #{e.inspect}" \
+                        "\n#{e.backtrace}"
+
+        routing.halt 400
       end
     end
   end

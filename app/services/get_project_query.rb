@@ -17,11 +17,11 @@ module Credence
       end
     end
 
-    def self.call(account:, project_id:)
+    def self.call(auth:, project_id:)
       project = Project.first(id: project_id)
       raise NotFoundError unless project
 
-      policy = ProjectPolicy.new(account, project)
+      policy = ProjectPolicy.new(auth.account, project, auth.scope)
       raise ForbiddenError unless policy.can_view?
 
       project.full_details.merge(policies: policy.summary)
